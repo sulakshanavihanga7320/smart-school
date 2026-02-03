@@ -98,7 +98,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 </div>
                 <nav className="sidebar-nav">
                     {navigation.map((item, index) => (
-                        <div key={index} onClick={() => window.innerWidth < 1024 && toggleSidebar()}>
+                        <div key={index} onClick={(e) => {
+                            if (window.innerWidth < 1024) toggleSidebar();
+                            if (item.path === '/logout') {
+                                e.preventDefault();
+                                setIsModalOpen(true);
+                            }
+                        }}>
                             <SidebarItem
                                 item={item}
                                 userRole={userRole}
