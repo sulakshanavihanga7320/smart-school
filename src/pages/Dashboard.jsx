@@ -409,4 +409,12 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard;
+import ErrorBoundary from '../components/ErrorBoundary';
+
+const DashboardWithBoundary = () => (
+    <ErrorBoundary>
+        <Dashboard />
+    </ErrorBoundary>
+);
+
+export default DashboardWithBoundary;
