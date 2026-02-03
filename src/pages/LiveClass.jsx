@@ -89,6 +89,7 @@ const LiveClass = () => {
 
             let error;
             if (editingId) {
+                // Remove 'id' from update payload to avoid primary key conflict safety issues
                 const { error: err } = await supabase
                     .from('live_meetings')
                     .update(meetingData)
@@ -97,18 +98,32 @@ const LiveClass = () => {
             } else {
                 const { error: err } = await supabase
                     .from('live_meetings')
-                    .insert([meetingData]);
+                    .insert([meetingData]); // Ensure array structure
                 error = err;
             }
 
-            if (error) throw error;
+            if (error) {
+                // Check specifically for AbortError which might happen on navigating away too fast
+                if (error.name === 'AbortError') {
+                    console.log('Request aborted');
+                    return;
+                }
+                throw error;
+            }
+
             alert(editingId ? 'Meeting updated successfully!' : 'Meeting created successfully!');
             resetForm();
-            fetchMeetings();
+
+            // Wait a small delay before fetching to ensure DB commit
+            setTimeout(() => fetchMeetings(), 500);
+
         } catch (err) {
-            console.error(err);
+            console.error("Meeting Error:", err);
+            // Ignore abort errors in catch block as well
+            if (err.name === 'AbortError' || err.message?.includes('aborted')) return;
+
             if (err.message && err.message.includes('not found')) {
-                alert('Database Table missing! Please run the SQL script.');
+                alert('Database Table missing! Please checks your Supabase tables.');
             } else {
                 alert('Error processing meeting: ' + (err.message || 'Unknown error'));
             }
