@@ -34,13 +34,18 @@ export const NotificationService = {
         }
     },
 
-    // Broadcast to EVERYONE (Staff + Students)
-    broadcast: async (title, message, type = 'alert') => {
+    // Broadcast to EVERYONE (Staff + Students), optionally excluding one user (sender)
+    broadcast: async (title, message, type = 'alert', excludeUserId = null) => {
         try {
             const allIds = await getAllUserIds();
             if (allIds.length === 0) return;
 
-            const notifications = allIds.map(id => ({
+            // Filter out the sender so they don't get their own notification
+            const targetIds = excludeUserId ? allIds.filter(id => id !== excludeUserId) : allIds;
+
+            if (targetIds.length === 0) return;
+
+            const notifications = targetIds.map(id => ({
                 user_id: id,
                 title,
                 message,
@@ -49,9 +54,11 @@ export const NotificationService = {
                 created_at: new Date()
             }));
 
-            await supabase.from('notifications').insert(notifications);
+            const { error } = await supabase.from('notifications').insert(notifications);
+            if (error) console.error("Broadcast Insert Error:", error);
+
         } catch (error) {
-            console.error("Broadcast Error:", error);
+            console.error("Broadcast Logic Error:", error);
         }
     }
 };

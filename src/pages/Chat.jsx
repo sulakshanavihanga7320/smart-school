@@ -162,17 +162,27 @@ const Chat = () => {
         if (!error) {
             setNewMessage('');
 
-            if (!selectedUser.isGroup) {
-                // Notify receiver only for private chats
-                import('../lib/NotificationService').then(({ NotificationService }) => {
+            import('../lib/NotificationService').then(({ NotificationService }) => {
+                const senderName = user.email ? user.email.split('@')[0] : 'Someone';
+
+                if (selectedUser.isGroup) {
+                    // BROADCAST to everyone except sender
+                    NotificationService.broadcast(
+                        'New Group Message',
+                        `${senderName}: ${newMessage.substring(0, 30)}${newMessage.length > 30 ? '...' : ''}`,
+                        'message',
+                        user.id // Exclude myself
+                    );
+                } else {
+                    // Private Message
                     NotificationService.send(
                         selectedUser.id,
                         'New Message',
-                        `${user.email.split('@')[0]} sent you a message`,
+                        `${senderName} sent you a message`,
                         'message'
                     );
-                });
-            }
+                }
+            });
         }
     };
 
