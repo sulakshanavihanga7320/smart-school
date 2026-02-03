@@ -1,8 +1,17 @@
 import { supabase } from './supabase';
 
-// Helper to fetch all valid user IDs (Students + Teachers)
+// Helper to fetch all valid user IDs (profiles works best as it maps to Auth IDs)
 const getAllUserIds = async () => {
     try {
+        // Try getting from profiles first (most reliable for Auth IDs)
+        const { data: pData } = await supabase.from('profiles').select('id');
+
+        if (pData && pData.length > 0) {
+            return pData.map(p => p.id);
+        }
+
+        // Fallback: If profiles empty, try students/employees but check for 'user_id' column if possible,
+        // or assume id matches (risky but better than nothing)
         const { data: sData } = await supabase.from('students').select('id');
         const { data: eData } = await supabase.from('employees').select('id');
 
