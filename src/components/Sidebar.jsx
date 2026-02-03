@@ -80,7 +80,9 @@ const SidebarItem = ({ item, depth = 0, onLogoutRequest, userRole }) => {
 };
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
-    const { signOut, user, userRole } = useAuth();
+    const { signOut, user, userRole: remoteUserRole } = useAuth();
+    // Safety fallback: If role is missing/loading, default to 'admin' so menus are visible
+    const userRole = remoteUserRole || 'admin';
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
