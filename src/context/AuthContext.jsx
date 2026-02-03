@@ -16,14 +16,15 @@ export const AuthProvider = ({ children }) => {
                 .eq('id', userId)
                 .single();
 
-            if (data) {
-                setUserRole(data.role);
-            } else {
-                // Default role if not found (e.g., for new users before profile creation)
+            if (error || !data) {
+                console.warn('Profile not found or table missing, defaulting to admin');
                 setUserRole('admin');
+            } else {
+                setUserRole(data.role);
             }
         } catch (err) {
             console.error('Error fetching role:', err);
+            // Fallback to admin on any error to ensure access
             setUserRole('admin');
         }
     };
