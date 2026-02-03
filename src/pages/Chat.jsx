@@ -83,10 +83,16 @@ const Chat = () => {
     }, [selectedUser, user.id]);
 
     const handleNewMessage = (msg) => {
+        // Prevent duplicates
+        const isDuplicate = (prev) => prev.some(m => m.id === msg.id);
+
         if (selectedUser.isGroup) {
             // Include if it's a group message (receiver_id is null)
             if (msg.receiver_id === null) {
-                setMessages((prev) => [...prev, msg].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)));
+                setMessages((prev) => {
+                    if (isDuplicate(prev)) return prev;
+                    return [...prev, msg].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                });
             }
         } else {
             // Private message logic
@@ -95,7 +101,10 @@ const Chat = () => {
                 (msg.sender_id === selectedUser.id && msg.receiver_id === user.id);
 
             if (isRelated) {
-                setMessages((prev) => [...prev, msg].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)));
+                setMessages((prev) => {
+                    if (isDuplicate(prev)) return prev;
+                    return [...prev, msg].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                });
             }
         }
     };
