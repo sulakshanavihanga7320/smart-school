@@ -137,17 +137,17 @@ const Chat = () => {
 
         if (!error) {
             setNewMessage('');
-            // Locally add message immediately for better UX
-            // setMessages((prev) => [...prev, { ...messageData, created_at: new Date().toISOString(), id: Math.random() }]); // Realtime will handle it, but this is faster if needed. Keeping it off to avoid dupes.
 
             if (!selectedUser.isGroup) {
                 // Notify receiver only for private chats
-                await supabase.from('notifications').insert([{
-                    user_id: selectedUser.id,
-                    title: 'New Message',
-                    message: `${user.email.split('@')[0]} sent you a message`,
-                    type: 'message'
-                }]);
+                import('../lib/NotificationService').then(({ NotificationService }) => {
+                    NotificationService.send(
+                        selectedUser.id,
+                        'New Message',
+                        `${user.email.split('@')[0]} sent you a message`,
+                        'message'
+                    );
+                });
             }
         }
     };

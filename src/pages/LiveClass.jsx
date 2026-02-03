@@ -103,13 +103,27 @@ const LiveClass = () => {
             }
 
             if (error) {
-                // Check specifically for AbortError which might happen on navigating away too fast
                 if (error.name === 'AbortError') {
                     console.log('Request aborted');
                     return;
                 }
                 throw error;
             }
+
+            // --- NOTIFICATION TRIGGER ---
+            const actionType = editingId ? 'Updated' : 'Scheduled';
+            const notifMsg = `${formData.title} has been ${actionType.toLowerCase()}. ID: ${formData.meetingId}`;
+
+            // Broadcast to everyone if it's a general meeting, or just log it
+            // For now, we broadcast all live class changes as high priority
+            import('../lib/NotificationService').then(({ NotificationService }) => {
+                NotificationService.broadcast(
+                    `Live Class ${actionType}`,
+                    notifMsg,
+                    'video'
+                );
+            });
+            // -----------------------------
 
             alert(editingId ? 'Meeting updated successfully!' : 'Meeting created successfully!');
             resetForm();
