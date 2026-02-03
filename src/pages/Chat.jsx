@@ -116,20 +116,35 @@ const Chat = () => {
 
     const fetchMessages = async () => {
         if (!selectedUser) return;
-        setMessages([]); // Clear previous view
 
-        let query = supabase.from('messages').select('*').order('created_at', { ascending: true });
+        // Keep loading state if needed, or just clear old ones to prevent mismatched chat
+        // setMessages([]); 
 
-        if (selectedUser.isGroup) {
-            // Fetch public messages (receiver_id IS NULL)
-            query = query.is('receiver_id', null);
-        } else {
-            // Fetch private messages between me and selectedUser
-            query = query.or(`and(sender_id.eq.${user.id},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${user.id})`);
+        try {
+            console.log("Fetching messages for:", selectedUser.isGroup ? 'GROUP' : selectedUser.full_name);
+            let query = supabase.from('messages').select('*').order('created_at', { ascending: true });
+
+            if (selectedUser.isGroup) {
+                // Fetch public messages (receiver_id IS NULL) - Explicitly check for null
+                query = query.is('receiver_id', null);
+            } else {
+                // Fetch private messages between me and selectedUser
+                query = query.or(`and(sender_id.eq.${user.id},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${user.id})`);
+            }
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error("Fetch Error:", error);
+            }
+
+            if (data) {
+                console.log("Messages found:", data.length);
+                setMessages(data);
+            }
+        } catch (err) {
+            console.error("System Error Fetching Msgs:", err);
         }
-
-        const { data, error } = await query;
-        if (data) setMessages(data);
     };
 
     const handleSendMessage = async (e) => {
