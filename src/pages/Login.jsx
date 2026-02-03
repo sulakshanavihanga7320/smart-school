@@ -30,6 +30,7 @@ const Login = () => {
                     <div className="logo-icon">S</div>
                     <h2>SMVSMS Portal</h2>
                     <p>Please enter your details to sign in</p>
+                    <p style={{ fontSize: '0.7rem', color: '#6366f1', marginTop: '5px' }}>v2.5 (Hardcoded Fix)</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="login-form">
