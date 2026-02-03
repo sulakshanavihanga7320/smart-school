@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { Send, User, UserPlus, Search, MoreVertical } from 'lucide-react';
+import { Send, User, UserPlus, Search, MoreVertical, MessageSquare } from 'lucide-react';
 import './Chat.css';
 
 const Chat = () => {
@@ -47,9 +47,36 @@ const Chat = () => {
     }, []);
 
     const fetchUsers = async () => {
-        // In a real app, you'd fetch from profiles table
-        const { data, error } = await supabase.from('profiles').select('*');
-        if (data) setUsers(data.filter(u => u.id !== user.id));
+        try {
+            // Fetch students and employees instead of 'profiles'
+            const { data: studentsData } = await supabase.from('students').select('id, full_name, class_name');
+            const { data: employeesData } = await supabase.from('employees').select('id, full_name, role');
+
+            const allUsers = [];
+
+            if (employeesData) {
+                allUsers.push(...employeesData.map(e => ({
+                    id: e.id,
+                    full_name: e.full_name,
+                    role: e.role || 'Staff',
+                    avatar_seed: e.full_name
+                })));
+            }
+
+            if (studentsData) {
+                allUsers.push(...studentsData.map(s => ({
+                    id: s.id,
+                    full_name: s.full_name,
+                    role: `Student (${s.class_name})`,
+                    avatar_seed: s.full_name
+                })));
+            }
+
+            // Filter out current user if their ID matches (unlikely if auth.uid is different from table ids, but good safety)
+            setUsers(allUsers.filter(u => u.id !== user.id));
+        } catch (err) {
+            console.error("Error fetching chat users:", err);
+        }
     };
 
     const fetchMessages = async () => {
