@@ -9,6 +9,22 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import './App.css';
 
+const LoadingScreen = () => (
+  <div className="loading-screen" style={{
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'var(--surface)',
+    color: 'white'
+  }}>
+    <div className="logo-icon animate-pulse" style={{ width: '60px', height: '60px', fontSize: '2rem', marginBottom: '1rem' }}>S</div>
+    <div className="spinner"></div>
+    <p style={{ marginTop: '1rem', opacity: 0.6 }}>Initializing SMVSMS...</p>
+  </div>
+);
+
 const PagePlaceholder = () => {
   const location = useLocation();
   const path = location.pathname.split('/').filter(Boolean).join(' > ');
@@ -44,6 +60,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 const AppRoutes = () => {
+  const { loading, user } = useAuth();
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -52,7 +70,7 @@ const AppRoutes = () => {
           <Layout />
         </ProtectedRoute>
       }>
-        <Route index element={<Dashboard />} />
+        <Route index element={loading ? <LoadingScreen /> : <Dashboard />} />
 
         {/* Admin Only */}
         <Route path="settings/profile" element={<ProtectedRoute allowedRoles={['admin']}><InstituteProfile /></ProtectedRoute>} />
