@@ -357,3 +357,49 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 768px) {
+    .portal-welcome {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .welcome-illustration {
+        position: static;
+        width: 120px;
+        margin: 1rem auto 0;
+    }
+
+    .attendance-charts {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .chart-wrapper {
+        margin: 0 auto;
+    }
+
+    .month-stat {
+        width: 100%;
+    }
+
+    .test-summary {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .attendance-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .student-portal {
+        padding: 0.75rem;
+    }
+
+    .welcome-text h1 {
+        font-size: 1.4rem;
+    }
+}

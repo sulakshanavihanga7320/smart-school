@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import InstituteProfile from './pages/InstituteProfile';
 import LiveClass from './pages/LiveClass';
+import Chat from './pages/Chat';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import './App.css';
@@ -74,6 +75,7 @@ const AppRoutes = () => {
         <Route path="homework/*" element={<ProtectedRoute allowedRoles={['admin', 'teacher', 'student', 'parent']}><PagePlaceholder /></ProtectedRoute>} />
         <Route path="behaviour/*" element={<ProtectedRoute allowedRoles={['admin', 'teacher', 'parent']}><PagePlaceholder /></ProtectedRoute>} />
         <Route path="live-class" element={<ProtectedRoute allowedRoles={['admin', 'teacher', 'student']}><LiveClass /></ProtectedRoute>} />
+        <Route path="chat" element={<ProtectedRoute allowedRoles={['admin', 'teacher', 'student', 'parent']}><Chat /></ProtectedRoute>} />
         <Route path="exams/*" element={<ProtectedRoute allowedRoles={['admin', 'teacher', 'student', 'parent']}><PagePlaceholder /></ProtectedRoute>} />
 
         <Route path="*" element={<PagePlaceholder />} />

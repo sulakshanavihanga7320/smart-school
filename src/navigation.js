@@ -239,5 +239,11 @@ export const navigation = [
       { name: 'Generate Certificate', path: '/certificates/generate' },
       { name: 'Certificate Templates', path: '/certificates/templates' }
     ]
+  },
+  {
+    name: 'Live Chat',
+    icon: MessageSquare,
+    path: '/chat',
+    roles: ['admin', 'teacher', 'student', 'parent']
   }
 ];

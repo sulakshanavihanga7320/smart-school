@@ -29,29 +29,52 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        let mounted = true;
+
         const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-                setUser(session.user);
-                await fetchUserRole(session.user.id);
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) console.error('Session fetch error:', error);
+
+                if (session?.user && mounted) {
+                    setUser(session.user);
+                    await fetchUserRole(session.user.id);
+                }
+            } catch (err) {
+                console.error('Session check failed:', err);
+            } finally {
+                if (mounted) setLoading(false);
             }
-            setLoading(false);
         };
 
         getSession();
 
+        // Safety net: force loading to false after 3 seconds no matter what
+        const timer = setTimeout(() => {
+            if (mounted) setLoading(false);
+        }, 3000);
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            if (session?.user) {
-                setUser(session.user);
-                await fetchUserRole(session.user.id);
-            } else {
-                setUser(null);
-                setUserRole(null);
+            try {
+                if (session?.user && mounted) {
+                    setUser(session.user);
+                    await fetchUserRole(session.user.id);
+                } else if (mounted) {
+                    setUser(null);
+                    setUserRole(null);
+                }
+            } catch (err) {
+                console.error('Auth state change error:', err);
+            } finally {
+                if (mounted) setLoading(false);
             }
-            setLoading(false);
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            mounted = false;
+            clearTimeout(timer);
+            subscription.unsubscribe();
+        };
     }, []);
 
     const value = {
@@ -60,11 +83,12 @@ export const AuthProvider = ({ children }) => {
         signOut: () => supabase.auth.signOut(),
         user,
         userRole,
+        loading,
     };
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };

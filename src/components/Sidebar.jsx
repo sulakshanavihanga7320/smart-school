@@ -79,7 +79,7 @@ const SidebarItem = ({ item, depth = 0, onLogoutRequest, userRole }) => {
     );
 };
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
     const { signOut, user, userRole } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -87,7 +87,7 @@ const Sidebar = () => {
 
     return (
         <>
-            <aside className="sidebar glass">
+            <aside className={`sidebar glass ${isOpen ? 'open' : ''}`}>
                 <div className="sidebar-header">
                     <div className="logo-container">
                         <div className="logo-icon">S</div>
@@ -96,12 +96,13 @@ const Sidebar = () => {
                 </div>
                 <nav className="sidebar-nav">
                     {navigation.map((item, index) => (
-                        <SidebarItem
-                            key={index}
-                            item={item}
-                            userRole={userRole}
-                            onLogoutRequest={() => setIsModalOpen(true)}
-                        />
+                        <div key={index} onClick={() => window.innerWidth < 1024 && toggleSidebar()}>
+                            <SidebarItem
+                                item={item}
+                                userRole={userRole}
+                                onLogoutRequest={() => setIsModalOpen(true)}
+                            />
+                        </div>
                     ))}
                 </nav>
                 <div className="sidebar-footer">
@@ -121,6 +122,9 @@ const Sidebar = () => {
                     </button>
                 </div>
             </aside>
+
+            {/* Overlay for mobile */}
+            {isOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
 
             <LogoutModal
                 isOpen={isModalOpen}

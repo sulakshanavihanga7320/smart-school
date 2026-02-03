@@ -92,3 +92,15 @@
     justify-content: center;
     gap: 5px;
 }
+
+@media (max-width: 480px) {
+    .login-box {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+        max-width: calc(100% - 2rem);
+    }
+
+    .login-header h2 {
+        font-size: 1.5rem;
+    }
+}
