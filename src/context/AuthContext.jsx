@@ -8,23 +8,36 @@ export const AuthProvider = ({ children }) => {
     const [userRole, setUserRole] = useState('admin');
     const [loading, setLoading] = useState(true);
 
-    const fetchUserRole = async (userId) => {
+    const fetchUserRole = async (user) => {
+        if (!user) return;
         try {
             const { data, error } = await supabase
                 .from('profiles')
                 .select('role')
-                .eq('id', userId)
+                .eq('id', user.id)
                 .single();
 
             if (error || !data) {
-                console.warn('Profile not found or table missing, defaulting to admin');
+                console.warn('Profile missing. Creating auto-profile for:', user.email);
+
+                // Auto-create profile so notifications work
+                const { error: insertError } = await supabase.from('profiles').insert([{
+                    id: user.id,
+                    email: user.email,
+                    role: 'admin', // Default role
+                    full_name: user.email.split('@')[0]
+                }]);
+
+                if (insertError) {
+                    console.error("Auto-profile creation failed:", insertError);
+                }
+
                 setUserRole('admin');
             } else {
                 setUserRole(data.role);
             }
         } catch (err) {
             console.error('Error fetching role:', err);
-            // Fallback to admin on any error to ensure access
             setUserRole('admin');
         }
     };
@@ -39,7 +52,7 @@ export const AuthProvider = ({ children }) => {
 
                 if (session?.user && mounted) {
                     setUser(session.user);
-                    await fetchUserRole(session.user.id);
+                    await fetchUserRole(session.user);
                 }
             } catch (err) {
                 console.error('Session check failed:', err);
@@ -59,7 +72,7 @@ export const AuthProvider = ({ children }) => {
             try {
                 if (session?.user && mounted) {
                     setUser(session.user);
-                    await fetchUserRole(session.user.id);
+                    await fetchUserRole(session.user);
                 } else if (mounted) {
                     setUser(null);
                     setUserRole(null);
