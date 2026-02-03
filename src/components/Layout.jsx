@@ -19,15 +19,23 @@ const Layout = () => {
 
         fetchNotifications();
 
+        // 1. Realtime Listener
         const subscription = supabase
             .channel('public:notifications')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, (payload) => {
-                setNotifications(prev => [payload.new, ...prev]);
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, (payload) => {
+                // Filter manually for safety if RLS/filter string is tricky
+                if (payload.new.user_id === user.id) {
+                    setNotifications(prev => [payload.new, ...prev]);
+                }
             })
             .subscribe();
 
+        // 2. Polling Fallback (Every 5s) - Ensures even if realtime fails, data arrives
+        const intervalId = setInterval(fetchNotifications, 5000);
+
         return () => {
             supabase.removeChannel(subscription);
+            clearInterval(intervalId);
         };
     }, [user]);
 
